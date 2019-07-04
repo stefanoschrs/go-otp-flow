@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <title>Generate TOTP</title>
+
+    <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
+    <link rel="stylesheet" href="//cdn.rawgit.com/necolas/normalize.css/master/normalize.css">
+    <link rel="stylesheet" href="//cdn.rawgit.com/milligram/milligram/master/dist/milligram.min.css">
+    <style>
+        .title {
+            text-align: center;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .qr__container {
+            display: flex;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="title">Generate TOTP</h1>
+
+        <section class="step-0">
+            <h3>Step 1: Scan the QR</h3>
+
+            <div class="qr__container">
+                <img src="data:image/png;base64,{{ .qr }}" alt="qr"/>
+            </div>
+
+            <div>
+                <button>Next</button>
+            </div>
+        </section>
+
+        <section class="step-1 hidden">
+            <h3>Step 2: Enter the generated OTP</h3>
+
+            <div class="input__container">
+                <input type="text">
+            </div>
+
+            <div>
+                <button>Next</button>
+            </div>
+        </section>
+
+        <section class="success hidden">
+            <h2>Success!</h2>
+        </section>
+
+        <section class="error hidden">
+            <h2 class="message">Error!</h2>
+        </section>
+    </div>
+
+    <script>
+      (function () {
+        const step0El = document.querySelector('.step-0')
+        const step1El = document.querySelector('.step-1')
+
+        const id = window.location.search.substr(1).split('&').find((e) => e.startsWith('id')).substr(3)
+
+        step0El.querySelector('button').onclick = () => {
+          _showSection('step-1')
+        }
+
+        step1El.querySelector('button').onclick = () => {
+          fetch('/validate', {
+            method: 'POST',
+            body: JSON.stringify({
+              id,
+              token: step1El.querySelector('input').value
+            })
+          })
+            .then((res) => {
+              switch (res.status) {
+                case 200: return showSuccess()
+                case 403: return showError('Wrong token!')
+                default: return showError('Something went wrong!')
+              }
+            })
+        }
+
+        function showSuccess () {
+          _showSection('success')
+        }
+
+        function showError (message) {
+          _showSection('error')
+          document.querySelector('section.error .message').innerText = message
+        }
+
+        function _showSection (name) {
+          [].forEach.call(document.querySelectorAll('section'), (el) => {
+            if (!el.className.includes('hidden')) {
+              el.className += ' hidden'
+            }
+          })
+
+          const el = document.querySelector('section.' + name)
+          el.className = el.className.replace(/[ ]*hidden[ ]*/, '')
+        }
+      })()
+    </script>
+</body>
+</html>
