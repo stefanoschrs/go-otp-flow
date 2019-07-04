@@ -3,12 +3,11 @@ package main
 import (
 	"bytes"
 	"encoding/base64"
+	"github.com/pquerna/otp"
 	"html/template"
 	"image/png"
 	"io/ioutil"
 	"strings"
-
-	"github.com/pquerna/otp"
 )
 
 func getBase64Image(key *otp.Key) (string, error) {
@@ -27,6 +26,9 @@ func getBase64Image(key *otp.Key) (string, error) {
 }
 
 func loadTemplate() (*template.Template, error) {
+	// TODO: Conditionally load from disk if templates.go not found
+	// return template.ParseGlob("templates/*")
+
 	t := template.New("")
 
 	for name, file := range Assets.Files {

@@ -53,7 +53,7 @@ func getGenerate(c *gin.Context) {
 	}
 
 	if c.Query("headless") != "true" {
-		c.HTML(http.StatusOK, "generate.tmpl", gin.H{
+		c.HTML(http.StatusOK, "/templates/generate.tmpl", gin.H{
 			"qr": base64Image,
 		})
 		return
